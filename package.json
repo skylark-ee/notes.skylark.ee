@@ -4,12 +4,15 @@
   "description": "File-storage backed notes in markdown",
   "main": "index.js",
   "scripts": {
+    "build": "rollup -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
+    "develop": "node src/server.js & rollup -w -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Flaki @ Skylark",
   "license": "Apache-2.0",
   "dependencies": {
     "dropbox": "^2.5.12",
+    "express": "^4.16.2",
     "isomorphic-fetch": "^2.2.1"
   }
 }

@@ -26,3 +26,11 @@
 ## Editor: ProseMirror
 - [prosemirror.net](https://prosemirror.net/)
 - [markdown in ProseMirror](https://prosemirror.net/examples/markdown/)
+
+
+## Module bundling: rollup.js
+- [rollupjs.org](https://rollupjs.org/)
+- `ENOSPC` error - watcher needs fix for [maximum file watches](https://stackoverflow.com/questions/16748737/grunt-watch-error-waiting-fatal-error-watch-enospc#comment28148277_17437601)
+
+## Serving: express.js
+- [`express.static`](https://expressjs.com/en/4x/api.html#example.of.express.static)
