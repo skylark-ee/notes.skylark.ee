@@ -1,0 +1,15 @@
+{
+  "name": "notes",
+  "version": "0.1.0",
+  "description": "File-storage backed notes in markdown",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Flaki @ Skylark",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "dropbox": "^2.5.12",
+    "isomorphic-fetch": "^2.2.1"
+  }
+}
