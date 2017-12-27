@@ -6,6 +6,7 @@
   "scripts": {
     "build": "cp node_modules/autosize/dist/autosize.min.js data/build/js/ && rollup -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
     "develop": "node src/server.js & rollup -w -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
+    "sync": "node -e \"require('./src/dropbox.js').dropboxSync()\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Flaki @ Skylark",
