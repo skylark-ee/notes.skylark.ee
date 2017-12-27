@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "mkdir -p data/build/js && cp node_modules/autosize/dist/autosize.min.js data/build/js/ && rollup -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
-    "develop": "node src/server.js & rollup -w -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
+    "develop": "node src/server.js --dev & rollup -w -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
     "pre-develop": "npm run build",
     "sync": "node -e \"require('./src/dropbox.js').dropboxSync()\"",
     "serve": "npm run build && node src/server.js --production",
