@@ -1,0 +1,45 @@
+aside {
+  position: fixed;
+  top: 0;
+  right: 0;
+
+  display: flex;
+  justify-content: flex-end;
+}
+
+aside select {
+  height: 2rem
+}
+aside ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+aside li {
+  padding: 0;
+  margin: 0;
+}
+
+aside button {
+  border: none;
+  background: none;
+  width: 5rem;
+  height: 5rem;
+
+  border: 1px solid #dee;
+  border-radius: .5rem;
+  margin-bottom: .5rem;
+  background: #cda;
+}
+
+
+aside.closed {
+  width: 3rem;
+  height: 3rem;
+  overflow: hidden;
+}
+aside.closed button {
+  width: 3rem;
+  height: 3rem;
+
+}
