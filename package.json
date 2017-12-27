@@ -6,6 +6,7 @@
   "scripts": {
     "build": "cp node_modules/autosize/dist/autosize.min.js data/build/js/ && rollup -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
     "develop": "node src/server.js & rollup -w -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
+    "pre-develop": "npm run build",
     "sync": "node -e \"require('./src/dropbox.js').dropboxSync()\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,6 +16,7 @@
     "autosize": "^4.0.0",
     "dropbox": "^2.5.12",
     "express": "^4.16.2",
+    "fs-extra": "^5.0.0",
     "isomorphic-fetch": "^2.2.1"
   }
 }
