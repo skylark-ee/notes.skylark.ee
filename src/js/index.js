@@ -7,7 +7,7 @@ const HOST = window.location.host
 autosize(EDITOR)
 
 fetch(`http://${HOST}/api/docs.json`).then(r => r.json()).then(docs => {
-  DOCSELECT.innerHTML = docs.map(doc => `<option>${doc}</option>`).join('')
+  DOCSELECT.innerHTML = docs.map(doc => `<option>${doc.name}</option>`).join('')
 
   let sel=(window.location.hash||'').substring(1);
   console.log(sel)
@@ -31,6 +31,15 @@ function save(doc) {
   ).then(r => console.log('Saved'))
 }
 
+function sync() {
+  return fetch(`/api/sync`, { method: 'post' })
+  .then(r => r.json()).then(outcome => {
+    console.log(outcome)
+    // reload file list
+    // load selection
+  })
+
+}
 
 $('aside ul :nth-child(1)>button').addEventListener('click', event => $('aside').classList.toggle('closed'))
 
@@ -52,3 +61,6 @@ DOCSELECT.addEventListener('change', event => {
   window.location.hash = `#${event.target.value}`
   load(event.target.value)
 })
+
+
+$('aside ul :nth-child(6)>button').addEventListener('click', event => sync())

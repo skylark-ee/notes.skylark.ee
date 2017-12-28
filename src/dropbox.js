@@ -16,61 +16,170 @@ const APIDIR = __dirname+'/../data/api'
 
 // List all markdown files
 function getDocs(response) {
-  return response.entries.filter(f => f.name.match(/\.md$/))
+
+  return (typeof response.entries === 'object' ? response.entries : response).map(
+    doc => (typeof doc === 'object' ? doc : ({ name: doc }))
+  ).filter(
+    f => f.name.match(/\.md$/)
+  )
 }
 
+function localFiles() {
+  const dir = fs.readdirSync(APIDIR+'/notes')
+  const files = getDocs(dir).map(doc => ({ name: doc.name, content_hash: module.exports.dropboxHash(`${APIDIR}/notes/${doc.name}`) }))
 
-module.exports.dropboxSync = function() {
-  return dbx.filesListFolder({path: ''})
-    .then(response => {
-      fs.writeFileSync('./data/response.json', JSON.stringify(response))
+  return files
+}
 
-      // Save file list
-      docs = getDocs(response)
-      fs.ensureDirSync(APIDIR);
-      fs.writeFileSync(`${APIDIR}/docs.json`, JSON.stringify(docs.map(f => f.path_display.substring(1))))
+// Resolves file sync issues in a way that avoids data loss
+// Uploads edited files if they were unchanged, also new files
+// Downloads changed files if they weren't edited, also new files
+// Warns about clashes and deleted files
+function resolveThreeWay(dbxCached, dbxOnline, local) {
+  const outcome = { download: [], upload: [], delete: [], conflict: [], log: [] }
 
-      return docs
-    })
+  // Find new online files
+  dbxOnline.filter(
+    onl => dbxCached.filter(c => c.name === onl.name).length === 0
+  ).map(
+    newdoc => {
+      outcome.download.push(newdoc)
+      outcome.log.push(`Downloaded new file: ${newdoc.name}`)
+    }
+  )
 
-    // Save all notes
-    .then(docs => {
-      fs.ensureDirSync(APIDIR+'/notes')
-      return Promise.all(docs.map(
-        note => dbx.filesDownload({ path: note.path_lower })
-          .then(file => {
-            fs.writeFileSync(`${APIDIR}/notes/${file.name}`, file.fileBinary)
-            console.log(`Synced ${file.name}`)
-            return file
-          })
-      ))
+  // Find new local files
+  local.filter(
+    loc => dbxCached.filter(c => c.name === loc.name).length === 0
+  ).map(
+    newdoc => {
+      outcome.upload.push(newdoc)
+      outcome.log.push(`Created new file: ${newdoc.name}`)
+    }
+  )
+
+  // Find new deleted files
+  dbxCached.filter(
+    c => dbxOnline.filter(onl => onl.name === c.name).length === 0
+  ).map(
+    staledoc => {
+      outcome.delete.push(staledoc)
+      outcome.log.push(`Deleted file: ${staledoc.name}`)
+    }
+  )
+
+  // Updated files
+  dbxCached.forEach(c => {
+    const onl = dbxOnline.filter(onl => onl.name === c.name)[0]
+
+    if (onl && onl.content_hash !== c.content_hash) {
+      outcome.download.push(onl)
+      outcome.log.push(`Updated to newer version: ${onl.name}`)
+    }
+  })
+
+  // Edited local files
+  local.forEach(loc => {
+    const c = dbxCached.filter(c => c.name === loc.name)[0]
+
+    if (c && c.content_hash !== loc.content_hash) {
+      outcome.upload.push(loc)
+      outcome.log.push(`Saving changes: ${loc.name}`)
+    }
+  })
+
+  // TODO: check for clashes/conflicts
+  // Changed on server & locally
+  // Changed locally and deleted on server
+
+  return outcome
+}
+
+function uploadDropboxFile(file) {
+  return dbx.filesUpload({
+    path: file.path_lower || '/'+file.name.toLowerCase(),
+    mode: 'overwrite',
+    contents: fs.readFileSync(`${APIDIR}/notes/${file.name}`)
+  })
+  .then(_ => console.log(`Synced ↑ ${file.name}`))
+
+  // Watch out for errors
+  .catch(error => {
+    fs.writeFileSync('./data/error.json', JSON.stringify(error, null, 4))
+    console.log(`Error ${error.status}: see error.json for details`)
+  })
+}
+
+function downloadDropboxFile(file) {
+  return dbx.filesDownload({ path: file.path_lower || '/'+file.name.toLowerCase() })
+    .then(file => {
+      // Fix encoding issue for utf8 files
+      const b = new Buffer(file.fileBinary, 'binary')
+
+      fs.writeFileSync(`${APIDIR}/notes/${file.name}`, b, 'utf8')
+      console.log(`Synced ↓ ${file.name}`)
+      return file
     })
 
     // Watch out for errors
     .catch(error => {
-      fs.writeFileSync('./data/error.json', JSON.stringify(error))
+      fs.writeFileSync('./data/error.json', JSON.stringify(error, null, 4))
+      console.log(`Error ${error.toString().substring(0,20)}: see error.json for details`)
+    })
+}
+
+module.exports.dropboxFiles = function() {
+  // Only interested in markdown files
+  return dbx.filesListFolder({path: ''}).then(response => getDocs(response))
+}
+
+module.exports.dropboxFilesCached = function() {
+  try {
+    return JSON.parse(fs.readFileSync(`${APIDIR}/docs.json`))
+  }
+  catch (e) {
+    return []
+  }
+}
+
+module.exports.dropboxSync = function() {
+  fs.ensureDirSync(`${APIDIR}/`)
+  fs.ensureDirSync(`${APIDIR}/notes`)
+
+  return module.exports.dropboxFiles()
+    .then(online => {
+      return resolveThreeWay(module.exports.dropboxFilesCached(),online,localFiles())
+    })
+    .then(outcome => {
+      // Upload all changes
+      const up = outcome.upload.map(file => uploadDropboxFile(file))
+
+      // Download all files
+      const down = outcome.download.map(file => downloadDropboxFile(file))
+
+      // Delete files
+      const del = outcome.delete.map(file => Promise.resolve(fs.unlinkSync(file.name)))
+
+      // Log
+      console.log(outcome.log)
+
+      return Promise.all(up.concat(down, del)).then(_ => outcome)
+    })
+    // Update "last sync" cache status
+    .then(outcome => {
+      return module.exports.dropboxFiles().then(online => {
+        fs.writeFileSync(`${APIDIR}/docs.json`, JSON.stringify(online, null, 4), 'utf8')
+      }).then(_ => outcome)
+    })
+
+    // Watch out for errors
+    .catch(error => {
+      fs.writeFileSync('./data/error.json', JSON.stringify(error, null, 4))
       console.log(error)
       console.log(`Error ${error.status}: see error.json for details`)
     })
 
 }
-
-
-module.exports.dropboxSave = function() {
-  return dbx.filesUpload({
-    path: '/notes-devlog.md',
-    mode: 'overwrite',
-    contents: fs.readFileSync('./devlog.md')
-  })
-
-  // Watch out for errors
-  .catch(error => {
-    fs.writeFileSync('./data/error.json', JSON.stringify(error))
-    console.log(`Error ${error.status}: see error.json for details`)
-  })
-
-}
-
 
 module.exports.dropboxHash = function(filename) {
   let hasher = require('./dropbox-content-hasher').create()
@@ -78,6 +187,11 @@ module.exports.dropboxHash = function(filename) {
 
   hasher.update(file)
   let hash = hasher.digest('hex')
-  console.log(hash)
   return hash
 }
+
+//console.log(localFiles())
+//console.log(module.exports.dropboxFilesCached())
+//module.exports.dropboxFiles().then(online => {
+//  console.log(resolveThreeWay(module.exports.dropboxFilesCached(),online,localFiles()))
+//}).catch(e => console.log(e))
