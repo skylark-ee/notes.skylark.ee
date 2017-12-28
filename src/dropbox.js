@@ -70,3 +70,14 @@ module.exports.dropboxSave = function() {
   })
 
 }
+
+
+module.exports.dropboxHash = function(filename) {
+  let hasher = require('./dropbox-content-hasher').create()
+  let file = fs.readFileSync(filename)
+
+  hasher.update(file)
+  let hash = hasher.digest('hex')
+  console.log(hash)
+  return hash
+}

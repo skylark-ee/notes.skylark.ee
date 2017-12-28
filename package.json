@@ -8,6 +8,7 @@
     "develop": "node src/server.js --dev & rollup -w -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
     "pre-develop": "npm run build",
     "sync": "node -e \"require('./src/dropbox.js').dropboxSync()\"",
+    "hash": "node -e \"require('./src/dropbox.js').dropboxHash(process.argv[1])\"",
     "serve": "npm run build && node src/server.js --production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
