@@ -8,6 +8,13 @@ autosize(EDITOR)
 
 fetch(`http://${HOST}/api/docs.json`).then(r => r.json()).then(docs => {
   DOCSELECT.innerHTML = docs.map(doc => `<option>${doc}</option>`).join('')
+
+  let sel=(window.location.hash||'').substring(1);
+  console.log(sel)
+  if (sel && docs.indexOf(sel)!==-1) {
+    DOCSELECT.value = sel;
+    load(sel);
+  }
 })
 
 function load(doc) {
@@ -42,5 +49,6 @@ $('aside ul :nth-child(5)>button').addEventListener('click', event => {
 })
 
 DOCSELECT.addEventListener('change', event => {
+  window.location.hash = `#${event.target.value}`
   load(event.target.value)
 })
