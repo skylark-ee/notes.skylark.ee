@@ -64,3 +64,19 @@ DOCSELECT.addEventListener('change', event => {
 
 
 $('aside ul :nth-child(6)>button').addEventListener('click', event => sync())
+
+
+$('aside ul :nth-child(7)>button').addEventListener('click', event => {
+  let filename = prompt('Enter filename:\n(.md will be appended automatically)', 'unnamed')
+
+  // Append markdown extension
+  if (!filename.match(/\.md$/)) filename += '.md'
+
+  DOCSELECT.insertAdjacentHTML( 'beforeend', `<option>${filename}</option>`)
+  DOCSELECT.value = filename
+
+  EDITOR.value = ''
+  save(filename).then(_ => load(filename))  
+
+  window.location.hash = `#${filename}`
+})
