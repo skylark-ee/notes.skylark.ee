@@ -1,6 +1,6 @@
 {
   "name": "notes",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "File-storage backed notes in markdown",
   "main": "index.js",
   "scripts": {
@@ -16,12 +16,14 @@
   "license": "Apache-2.0",
   "dependencies": {
     "autosize": "^4.0.0",
-    "dropbox": "^2.5.12",
+    "cookie-parser": "^1.4.3",
+    "dropbox": "^2.5.13",
     "express": "^4.16.2",
     "fs-extra": "^5.0.0",
-    "isomorphic-fetch": "^2.2.1"
+    "isomorphic-fetch": "^2.2.1",
+    "ppc-messaging": "^2.0.0"
   },
   "devDependencies": {
-    "rollup": "^0.53.0"
+    "rollup": "^0.53.1"
   }
 }

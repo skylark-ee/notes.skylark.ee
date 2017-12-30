@@ -6,7 +6,7 @@ const HOST = window.location.host
 
 autosize(EDITOR)
 
-fetch(`http://${HOST}/api/docs.json`).then(r => r.json()).then(docs => {
+fetch(`http://${HOST}/api/docs.json`, { credentials: 'same-origin' }).then(r => r.json()).then(docs => {
   DOCSELECT.innerHTML = docs.map(doc => `<option>${doc.name}</option>`).join('')
 
   let sel=(window.location.hash||'').substring(1);
@@ -18,21 +18,22 @@ fetch(`http://${HOST}/api/docs.json`).then(r => r.json()).then(docs => {
 })
 
 function load(doc) {
-  return fetch(`http://${HOST}/api/notes/${doc}`).then(n => n.text()).then(note => {
+  return fetch(`http://${HOST}/api/notes/${doc}`,  { credentials: 'same-origin' }).then(n => n.text()).then(note => {
     EDITOR.value = note
     autosize.update(EDITOR)
   })
 }
 function save(doc) {
   return fetch(`/api/notes/${DOCSELECT.value}`, {
+      credentials: 'same-origin',
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: EDITOR.value }) }
-  ).then(r => console.log('Saved'))
+      body: JSON.stringify({ contents: EDITOR.value })
+  }).then(r => console.log('Saved'))
 }
 
 function sync() {
-  return fetch(`/api/sync`, { method: 'post' })
+  return fetch(`/api/sync`, { method: 'post', credentials: 'same-origin' })
   .then(r => r.json()).then(outcome => {
     console.log(outcome)
     // reload file list
@@ -76,7 +77,7 @@ $('aside ul :nth-child(7)>button').addEventListener('click', event => {
   DOCSELECT.value = filename
 
   EDITOR.value = ''
-  save(filename).then(_ => load(filename))  
+  save(filename).then(_ => load(filename))
 
   window.location.hash = `#${filename}`
 })
