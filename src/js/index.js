@@ -6,7 +6,7 @@ const HOST = window.location.host
 
 autosize(EDITOR)
 
-fetch(`http://${HOST}/api/docs.json`, { credentials: 'same-origin' }).then(r => r.json()).then(docs => {
+fetch(`/api/docs.json`, { credentials: 'same-origin' }).then(r => r.json()).then(docs => {
   DOCSELECT.innerHTML = docs.map(doc => `<option>${doc.name}</option>`).join('')
 
   let sel=(window.location.hash||'').substring(1);
@@ -18,7 +18,7 @@ fetch(`http://${HOST}/api/docs.json`, { credentials: 'same-origin' }).then(r => 
 })
 
 function load(doc) {
-  return fetch(`http://${HOST}/api/notes/${doc}`,  { credentials: 'same-origin' }).then(n => n.text()).then(note => {
+  return fetch(`/api/notes/${doc}`,  { credentials: 'same-origin' }).then(n => n.text()).then(note => {
     EDITOR.value = note
     autosize.update(EDITOR)
   })

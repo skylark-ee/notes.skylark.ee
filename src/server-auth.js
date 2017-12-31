@@ -53,7 +53,7 @@ function handler(req, res) {
   // TODO: also make it possible for central auth to revoke sessions (when user removes
   // devices post onto auth endpoint and revoke session)
   res.cookie('$auth', resp.message.session_id, {
-    // secure: true,
+    secure: true,
     httpOnly: false, // allow to be used in Fetch
     maxAge: 2*30*24*3600*1000 // 2 months
   })
