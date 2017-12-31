@@ -10,10 +10,16 @@ fetch(`/api/docs.json`, { credentials: 'same-origin' }).then(r => r.json()).then
   DOCSELECT.innerHTML = docs.map(doc => `<option>${doc.name}</option>`).join('')
 
   let sel=(window.location.hash||'').substring(1);
-  console.log(sel)
-  if (sel && docs.indexOf(sel)!==-1) {
-    DOCSELECT.value = sel;
-    load(sel);
+
+  if (sel && docs.filter(d => d.name === sel).length) {
+    setTimeout(_ => {
+      console.log('Switched to', sel)
+      DOCSELECT.value = sel
+      load(sel)
+    }, 50);
+  } else {
+    window.location.hash = ''
+    load(docs[0].name)
   }
 })
 
