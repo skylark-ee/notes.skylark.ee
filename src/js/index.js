@@ -81,3 +81,13 @@ $('aside ul :nth-child(7)>button').addEventListener('click', event => {
 
   window.location.hash = `#${filename}`
 })
+
+// Capture Ctrl+S and save the doc instead of popping up the native save dialog
+document.addEventListener('keydown', (e) => {
+  if (e.key === "s" && e.ctrlKey) {
+    e.preventDefault()
+
+    console.log('Saving!', e)
+    save(DOCSELECT.value)
+  }
+})
