@@ -23,13 +23,20 @@ aside li {
 aside button {
   border: none;
   background: none;
-  width: 5rem;
-  height: 5rem;
+  width: 4rem;
+  height: 4rem;
 
-  border: 1px solid #dee;
+  box-shadow: 0 .1rem .25rem #bbe;
+  border: 1px solid white;
   border-radius: .5rem;
-  margin-bottom: .5rem;
-  background: #cda;
+  margin-bottom: .25rem;
+  padding: 1rem;
+
+  background: linear-gradient(135deg, #ddf,#37e);
+}
+
+aside button>svg {
+  fill: white;
 }
 
 
@@ -41,5 +48,16 @@ aside.closed {
 aside.closed button {
   width: 3rem;
   height: 3rem;
+  padding: .5rem;
+}
 
+aside select {
+	background: linear-gradient(135deg, #ddf,#37e);
+	color: white;
+	border-style: none;
+	height: 4rem;
+	padding: .25rem;
+	margin-right: .5rem;
+	border-radius: .5rem;
+	text-shadow: 0 0 .25rem #37e;
 }
