@@ -95,7 +95,7 @@ function resolveThreeWay(dbxCached, dbxOnline, local) {
   return outcome
 }
 
-function uploadDropboxFile(file) {
+function uploadDropboxFile(file, retries = 3) {
   return dbx.filesUpload({
     path: file.path_lower || '/'+file.name.toLowerCase(),
     mode: 'overwrite',
@@ -105,6 +105,12 @@ function uploadDropboxFile(file) {
 
   // Watch out for errors
   .catch(error => {
+    // too_many_write_operations concurrent file-write error, try again a bit later
+    if (error.status === 429) {
+      console.log(`[!] Error 429: ${file.name} (retries: ${retries})`)
+      return new Promise(resolve => setTimeout(_ => resolve(uploadDropboxFile(file, retries-1)), Math.random()*2000))
+    }
+
     fs.writeFileSync('./data/error.json', JSON.stringify(error, null, 4))
     console.log(`Error ${error.status}: see error.json for details`)
   })
