@@ -48,9 +48,21 @@ app.use(express.static(path.join(__dirname, 'www')))
 app.use(express.static(path.join(__dirname, '../data/build/')))
 app.use('/api', express.static(API_PATH, { etag: false, maxAge: 0 }))
 
-// Serve a document
+// Store a document
 app.post('/api/notes/:filename', express.json(), (req,res) => {
-  fs.writeFileSync(`${API_PATH}/notes/${req.params.filename}`, req.body.contents)
+  const filename = req.params.filename
+
+  fs.writeFileSync(`${API_PATH}/notes/${filename}`, req.body.contents)
+
+  // Update docs.json if this is a new file
+  const docsfile = fs.readFileSync(`${API_PATH}/docs.json`).toString()
+  const docs = JSON.parse(docsfile)
+  if (!docs.filter(d => d.name === filename).length) {
+    docs.push({ name: filename, size: req.body.contents.length, content_hash: '' })
+  }
+  fs.writeFileSync(`${API_PATH}/docs.json`, JSON.stringify(docs))
+
+
   res.sendStatus(200)
 })
 
