@@ -1,6 +1,7 @@
 import { notify } from './notifications.js'
 import { list as listDocuments, save, load } from './persistence.js'
 import { default as initAutosave } from './autosave.js'
+import { default as initEditor } from './editor.js'
 
 const $ = document.querySelector.bind(document)
 
@@ -11,6 +12,7 @@ autosize(EDITOR)
 
 listDocuments()
 initAutosave()
+initEditor()
 
 
 $('aside ul :nth-child(1)>button').addEventListener('click', event => $('aside').classList.toggle('closed'))

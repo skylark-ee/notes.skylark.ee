@@ -9,4 +9,7 @@ textarea {
   width: 100%;
   border: none;
   padding: 1em;
+
+  -moz-tab-size: 2;
+  tab-size: 2;
 }

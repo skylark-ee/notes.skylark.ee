@@ -40,7 +40,10 @@ export function save(doc) {
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: EDITOR.value })
-  }).then(r => notify('Saved!', `${doc} - document updated.`))
+  }).then(r => {
+    SERVER_DOCS[doc] = EDITOR.value
+    notify('Saved!', `${doc} - document updated.`)
+  })
 }
 
 export function sync() {
