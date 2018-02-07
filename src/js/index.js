@@ -1,5 +1,5 @@
 import { notify } from './notifications.js'
-import { list as listDocuments, save, load } from './persistence.js'
+import { list as listDocuments, save, load, sync } from './persistence.js'
 import { default as initAutosave } from './autosave.js'
 import { default as initEditor } from './editor.js'
 
