@@ -25,6 +25,24 @@ app.all('/auth', express.urlencoded(), require('./server-auth').handler)
 app.use(require('./server-session').handler)
 
 
+// JS-bundle
+app.get('/js/bundle.js', (req,res) => {
+  const rollup = require('rollup')
+  rollup.rollup({
+    input: __dirname+'/js/index.js'
+  })
+    .then(bundle => bundle.generate({
+      format: 'iife',
+      sourcemap: 'inline'
+    }))
+    .then(result => {
+      res.type('application/javascript').send(result.code)
+    })
+    .catch(e => {
+      res.status(500).send('/* ROLLUP: '+e+' */')
+    })
+})
+
 // Static asset hosting
 app.use(express.static(path.join(__dirname, 'www')))
 app.use(express.static(path.join(__dirname, '../data/build/')))
