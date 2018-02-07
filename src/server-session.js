@@ -38,12 +38,12 @@ function handler(req, res, next) {
   res.status(403).send(`
     <!doctype html>
     <html>
-      <head><meta charset="utf8"><title>Login required</title></head>
+      <head><meta charset="utf8"><title>Login required</title>
       <style>
         body, html { min-height: 100%; background: #1DA1F2 }
         body { display: flex; justify-content: center; align-items: center; margin: 0; min-height: 100vh }
         button { font-size: 2em; padding: 1em }
-      </style>
+      </style></head>
       <body>
       <form action="${CFG.AUTH.url}" method="post">
         <button name="login" value="1">Log in</button>
