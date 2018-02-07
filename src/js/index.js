@@ -1,56 +1,17 @@
 import { notify } from './notifications.js'
+import { list as listDocuments, save, load } from './persistence.js'
+import { default as initAutosave } from './autosave.js'
 
 const $ = document.querySelector.bind(document)
 
 const EDITOR = document.querySelector('textarea')
 const DOCSELECT = document.querySelector('aside select')
-const HOST = window.location.host
 
 autosize(EDITOR)
 
-fetch(`/api/docs.json`, { credentials: 'same-origin' }).then(r => r.json()).then(docs => {
-  DOCSELECT.innerHTML = docs.map(doc => `<option>${doc.name}</option>`).join('')
+listDocuments()
+initAutosave()
 
-  let sel=(window.location.hash||'').substring(1);
-
-  if (sel && docs.filter(d => d.name === sel).length) {
-    setTimeout(_ => {
-      console.log('Switched to', sel)
-      DOCSELECT.value = sel
-      load(sel)
-    }, 50);
-  } else {
-    window.location.hash = ''
-    load(docs[0].name)
-  }
-})
-
-function load(doc) {
-  return fetch(`/api/notes/${doc}`,  { credentials: 'same-origin' }).then(n => n.text()).then(note => {
-    EDITOR.value = note
-    autosize.update(EDITOR)
-  })
-}
-function save(doc) {
-  doc = doc || DOCSELECT.value
-
-  return fetch(`/api/notes/${doc}`, {
-      credentials: 'same-origin',
-      method: 'post',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: EDITOR.value })
-  }).then(r => notify('Saved!', `${doc} - document updated.`))
-}
-
-function sync() {
-  return fetch(`/api/sync`, { method: 'post', credentials: 'same-origin' })
-  .then(r => r.json()).then(outcome => {
-    console.log(outcome)
-    // reload file list
-    // load selection
-  })
-
-}
 
 $('aside ul :nth-child(1)>button').addEventListener('click', event => $('aside').classList.toggle('closed'))
 
