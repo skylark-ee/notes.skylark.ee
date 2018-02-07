@@ -1,3 +1,5 @@
+import { notify } from './notifications.js'
+
 const $ = document.querySelector.bind(document)
 
 const EDITOR = document.querySelector('textarea')
@@ -30,12 +32,14 @@ function load(doc) {
   })
 }
 function save(doc) {
-  return fetch(`/api/notes/${DOCSELECT.value}`, {
+  doc = doc || DOCSELECT.value
+
+  return fetch(`/api/notes/${doc}`, {
       credentials: 'same-origin',
       method: 'post',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: EDITOR.value })
-  }).then(r => console.log('Saved'))
+  }).then(r => notify('Saved!', `${doc} - document updated.`))
 }
 
 function sync() {
