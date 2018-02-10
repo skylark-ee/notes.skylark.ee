@@ -166,6 +166,25 @@ function downloadDropboxFile(file) {
     })
 }
 
+function deleteLocalFile(file) {
+  const path = `${APIDIR}/notes/${file.name}`
+
+  return Promise.resolve().then(_ => {
+    if (fs.existsSync(path)) {
+      fs.unlinkSync(path)
+
+      console.log(`Removed × ${file.name}`)
+    }
+  })
+
+  // Handle errors
+  .catch(error => {
+    fs.writeFileSync('./data/error.json', JSON.stringify(error, null, 4))
+    console.log(`Error ${error.toString().substring(0,20)}: see error.json for details`)
+  })
+
+}
+
 module.exports.dropboxFiles = function() {
   // Only interested in markdown files
   return dbx.filesListFolder({path: ''}).then(response => getDocs(response))
@@ -199,7 +218,7 @@ module.exports.dropboxSync = function(dryRun = false) {
       const down = outcome.download.map(file => dryRun ? Promise.resolve('DL: '+file.name) : downloadDropboxFile(file))
 
       // Delete files
-      const del = outcome.delete.map(file => dryRun ? Promise.resolve('RM: '+file.name) : Promise.resolve(fs.existsSync(file.name)&&fs.unlinkSync(file.name)))
+      const del = outcome.delete.map(file => dryRun ? Promise.resolve('RM: '+file.name) : deleteLocalFile(file))
 
       // Log
       console.log((dryRun?'[DRY RUN] ':'')+'Sync results:\n> '+outcome.log.join('\n> '))
