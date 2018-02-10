@@ -8,6 +8,7 @@
     "develop": "node src/server.js --dev",
     "pre-develop": "npm run build",
     "sync": "node -e \"require('./src/dropbox.js').dropboxSync()\"",
+    "sync-dry-run": "node -e \"require('./src/dropbox.js').dropboxSync('dry-run')\"",
     "hash": "node -e \"console.log(require('./src/dropbox.js').dropboxHash(process.argv[1]))\"",
     "serve": "npm run build && npm run sync && node src/server.js --production",
     "test": "echo \"Error: no test specified\" && exit 1"

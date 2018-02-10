@@ -148,7 +148,7 @@ module.exports.dropboxFilesCached = function() {
   }
 }
 
-module.exports.dropboxSync = function() {
+module.exports.dropboxSync = function(dryRun = false) {
   fs.ensureDirSync(`${APIDIR}/`)
   fs.ensureDirSync(`${APIDIR}/notes`)
 
@@ -158,23 +158,27 @@ module.exports.dropboxSync = function() {
     })
     .then(outcome => {
       // Upload all changes
-      const up = outcome.upload.map(file => uploadDropboxFile(file))
+      const up = outcome.upload.map(file => dryRun ? Promise.resolve('UL: '+file.name) : uploadDropboxFile(file))
 
       // Download all files
-      const down = outcome.download.map(file => downloadDropboxFile(file))
+      const down = outcome.download.map(file => dryRun ? Promise.resolve('DL: '+file.name) : downloadDropboxFile(file))
 
       // Delete files
-      const del = outcome.delete.map(file => Promise.resolve(fs.unlinkSync(file.name)))
+      const del = outcome.delete.map(file => dryRun ? Promise.resolve('RM: '+file.name) : Promise.resolve(fs.existsSync(file.name)&&fs.unlinkSync(file.name)))
 
       // Log
-      console.log(outcome.log)
+      console.log((dryRun?'[DRY RUN] ':'')+'Sync results:\n> '+outcome.log.join('\n> '))
 
       return Promise.all(up.concat(down, del)).then(_ => outcome)
     })
     // Update "last sync" cache status
     .then(outcome => {
       return module.exports.dropboxFiles().then(online => {
-        fs.writeFileSync(`${APIDIR}/docs.json`, JSON.stringify(online, null, 4), 'utf8')
+        if (dryRun) {
+          fs.writeFileSync(`${APIDIR}/docs.dry-run.json`, JSON.stringify(online, null, 4), 'utf8')
+        } else {
+          fs.writeFileSync(`${APIDIR}/docs.json`, JSON.stringify(online, null, 4), 'utf8')
+        }
       }).then(_ => outcome)
     })
 
