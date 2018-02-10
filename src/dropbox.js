@@ -31,6 +31,32 @@ function localFiles() {
   return files
 }
 
+function filesInBoth(source1, source2) {
+  // All files in source 1...
+  return source1.filter(
+    // ...that can also be found in source 2
+    s1 => source2.filter(s2 => s2.name === s1.name).length > 0
+  )
+}
+function filesNotInTheOther(source1, source2) {
+  // All files in source 1...
+  return source1.filter(
+    // ...that are not represented in source 2
+    s1 => source2.filter(s2 => s2.name === s1.name).length === 0
+  )
+}
+function filesWhere(source1, source2, criteria) {
+  return source1.filter(
+    s1 => source2.filter(s2 => s2.name === s1.name && criteria(s1,s2)).length > 0
+  )
+}
+function filesDiscard(source, criteria) {
+  let idx
+  while ((idx = source.findIndex(criteria)) >= 0) {
+    source.splice(idx,1)
+  }
+}
+
 // Resolves file sync issues in a way that avoids data loss
 // Uploads edited files if they were unchanged, also new files
 // Downloads changed files if they weren't edited, also new files
@@ -39,58 +65,64 @@ function resolveThreeWay(dbxCached, dbxOnline, local) {
   const outcome = { download: [], upload: [], delete: [], conflict: [], log: [] }
 
   // Find new online files
-  dbxOnline.filter(
-    onl => dbxCached.filter(c => c.name === onl.name).length === 0
-  ).map(
+  // (all files currently online, that we don't know of in the list of cached docs)
+  filesNotInTheOther(dbxOnline, dbxCached)
+  .forEach(
     newdoc => {
       outcome.download.push(newdoc)
-      outcome.log.push(`Downloaded new file: ${newdoc.name}`)
+      outcome.log.push(`Download new file: ${newdoc.name}`)
     }
   )
 
   // Find new local files
-  local.filter(
-    loc => dbxCached.filter(c => c.name === loc.name).length === 0
-  ).map(
+  // (all local files that weren't originally from Dropbox, so they are not in cached docs)
+  filesNotInTheOther(local, dbxCached)
+  .forEach(
     newdoc => {
       outcome.upload.push(newdoc)
-      outcome.log.push(`Created new file: ${newdoc.name}`)
+      outcome.log.push(`Create new file: ${newdoc.name}`)
     }
   )
 
   // Find new deleted files
-  dbxCached.filter(
-    c => dbxOnline.filter(onl => onl.name === c.name).length === 0
-  ).map(
+  // (all files that were previously in dropbox (cached), but now are gone (online))
+  filesNotInTheOther(dbxCached, dbxOnline)
+  .forEach(
     staledoc => {
       outcome.delete.push(staledoc)
-      outcome.log.push(`Deleted file: ${staledoc.name}`)
+      outcome.log.push(`Delete file: ${staledoc.name}`)
     }
   )
 
   // Updated files
-  dbxCached.forEach(c => {
-    const onl = dbxOnline.filter(onl => onl.name === c.name)[0]
-
-    if (onl && onl.content_hash !== c.content_hash) {
-      outcome.download.push(onl)
-      outcome.log.push(`Updated to newer version: ${onl.name}`)
-    }
+  // (all cached files that have been changed in dropbox changed since the last sync)
+  filesWhere(dbxCached, dbxOnline, (c,o) => c.content_hash !== o.content_hash)
+  .forEach(doc => {
+    outcome.download.push(doc)
+    outcome.log.push(`Download changes: ${doc.name}`)
   })
 
   // Edited local files
-  local.forEach(loc => {
-    const c = dbxCached.filter(c => c.name === loc.name)[0]
-
-    if (c && c.content_hash !== loc.content_hash) {
-      outcome.upload.push(loc)
-      outcome.log.push(`Saving changes: ${loc.name}`)
-    }
+  // (all files in the filesystem that are originally from dropbox but has changed locally)
+  filesWhere(dbxCached, local, (c,l) => c.content_hash !== l.content_hash)
+  .forEach(doc => {
+    outcome.upload.push(doc)
+    outcome.log.push(`Save changes: ${doc.name}`)
   })
 
-  // TODO: check for clashes/conflicts
-  // Changed on server & locally
-  // Changed locally and deleted on server
+  // Conflicting sync
+  // (a file is queued for both upload & download)
+  filesInBoth(outcome.upload, outcome.download)
+  .forEach(doc => {
+    // Register conflict
+    outcome.conflict.push(doc)
+    outcome.log.push(`Conflicts prevented changes: ${doc.name}`)
+
+    // Prevent changes
+    filesDiscard(outcome.upload, up => doc.name===up.name)
+    filesDiscard(outcome.download, dl => doc.name===dl.name)
+  })
+  // TODO: Changed locally and deleted on server
 
   return outcome
 }
