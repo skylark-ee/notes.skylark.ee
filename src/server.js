@@ -19,7 +19,7 @@ app.use(cookieParser())
 
 
 // Authentication handler (has to come before auth cookie handling)
-app.all('/auth', express.urlencoded(), require('./server-auth').handler)
+app.all('/auth', express.urlencoded({ extended: false }), require('./server-auth').handler)
 
 // Auth cookie handling
 app.use(require('./server-session').handler)
