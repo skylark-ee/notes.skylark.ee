@@ -141,7 +141,10 @@ module.exports.dropboxFiles = function() {
 
 module.exports.dropboxFilesCached = function() {
   try {
-    return JSON.parse(fs.readFileSync(`${APIDIR}/docs.json`))
+    return JSON.parse(fs.readFileSync(`${APIDIR}/docs.json`)).filter(
+      // Only list files that are originally from dropbox
+      file => !!file.rev
+    )
   }
   catch (e) {
     return []
