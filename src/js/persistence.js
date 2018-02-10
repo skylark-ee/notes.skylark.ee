@@ -8,6 +8,9 @@ const SERVER_DOCS = []
 
 export function list() {
   return fetch(`/api/docs.json`, { credentials: 'same-origin' }).then(r => r.json()).then(docs => {
+    // Sort docs by name
+    docs.sort((a,b) => a.name > b.name)
+
     DOCSELECT.innerHTML = docs.map(doc => `<option>${doc.name}</option>`).join('')
 
     let sel=(window.location.hash||'').substring(1);
@@ -50,6 +53,7 @@ export function sync() {
   return fetch(`/api/sync`, { method: 'post', credentials: 'same-origin' })
   .then(r => r.json()).then(outcome => {
     console.log(outcome)
+    notify('Successfully synced changes!', `See console for details.`)
     // reload file list
     // load selection
   })
