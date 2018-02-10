@@ -53,6 +53,7 @@ $('aside ul :nth-child(7)>button').addEventListener('click', event => {
   save(filename).then(_ => load(filename))
 
   window.location.hash = `#${filename}`
+  listDocuments()
 })
 
 // Capture Ctrl+S and save the doc instead of popping up the native save dialog

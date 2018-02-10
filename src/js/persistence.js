@@ -52,10 +52,11 @@ export function save(doc) {
 export function sync() {
   return fetch(`/api/sync`, { method: 'post', credentials: 'same-origin' })
   .then(r => r.json()).then(outcome => {
-    console.log(outcome)
+    console.log(outcome.log.join('\n'))
     notify('Successfully synced changes!', `See console for details.`)
-    // reload file list
-    // load selection
+
+    // Update documents list
+    return list()
   })
 }
 
