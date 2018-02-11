@@ -29,6 +29,23 @@ export default function init() {
     }
   }, true)
 
+  // Swipe down on menu button for quick switch
+  let swipe
+  document.querySelector('aside ul button[name="menu"]').addEventListener('touchstart', e => {
+    e.preventDefault()
+    swipe = { start: e.touches[0].screenY }
+  })
+  document.querySelector('aside ul button[name="menu"]').addEventListener('touchmove', e => {
+    swipe.move = e.touches[0].screenY
+  })
+  document.querySelector('aside ul button[name="menu"]').addEventListener('touchend', e => {
+    console.log(swipe)
+
+    if (swipe.move - swipe.start > 20) {
+      open()
+    }
+  })
+
   const css = document.createElement('link')
   css.rel = 'stylesheet'
   css.href = '/css/quickswitch.css'
@@ -78,6 +95,9 @@ function open() {
 
   const input = document.querySelector('#overlay input')
   const list = document.querySelector('#overlay .switchmatch')
+
+  // Touch-friendly close
+  list.addEventListener('click', close)
 
   let notes = ( STATE.get('notes') || []).map(n => {
     const node = document.createElement('li')
