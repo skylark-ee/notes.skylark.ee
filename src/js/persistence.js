@@ -1,5 +1,7 @@
 import { notify } from './notifications.js'
 
+import { default as STATE } from './state.js'
+
 const EDITOR = document.querySelector('textarea')
 const DOCSELECT = document.querySelector('aside select')
 
@@ -25,6 +27,8 @@ export function list() {
       window.location.hash = ''
       load(docs[0].name)
     }
+
+    STATE.set('notes', docs)
   })
 }
 
