@@ -98,8 +98,18 @@ function open() {
   const input = document.querySelector('#overlay input')
   const list = document.querySelector('#overlay .switchmatch')
 
-  // Touch-friendly close
-  list.addEventListener('click', close)
+  // Touch-friendly switch/close
+  list.addEventListener('click', e => {
+    // Tapped on list item, switch to it
+    if (e.target!==list) {
+      const targetdoc = e.target.textContent.trim()
+      switchTo(targetdoc)
+
+    // Tapped on empty space, dismiss overlay
+    } else {
+      close(e)
+    }
+  })
 
   let notes = ( STATE.get('notes') || []).map(n => {
     const node = document.createElement('li')
