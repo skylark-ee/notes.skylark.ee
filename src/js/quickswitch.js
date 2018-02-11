@@ -1,6 +1,8 @@
 'use strict'
 
 import { default as STATE } from './state.js'
+import { notify } from './notifications.js'
+import { isModified, save, load } from './persistence.js'
 
 
 const html = `
@@ -14,11 +16,16 @@ const html = `
 `
 
 export default function init() {
-  // Capture Ctrl+s and save the doc instead of popping up the native save dialog
+  // Hook quickswitch overlay to Ctrl+L or a menu button click
+  document.querySelector('aside ul button[name="quickswitch"]').addEventListener('click', open)
   document.addEventListener('keydown', (e) => {
     if (e.key === 'l' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault()
-      open()
+      open(e)
+    }
+    if (e.key === 'Enter') {
+      // TODO: use STATE or a module-wide selection variable instead
+      switchTo(document.querySelector('#overlay .selected').textContent.trim())
     }
   }, true)
 
@@ -28,6 +35,35 @@ export default function init() {
   document.head.appendChild(css)
 
   console.log('QuickSwitch enabled.')
+}
+
+
+
+function switchTo(newdoc) {
+  const doc = STATE.get('activeDocument')
+  const DOCSELECT = document.querySelector('aside select')
+
+  isModified(doc).then(({ server, editor }) => {
+    let save = Promise.resolve()
+
+    // Modified in editor, but not on server => autosave
+    if (editor && !server) {
+      save = save(doc).then(_ => console.log(`Saved: ${doc}`))
+    }
+
+    if (editor && server) {
+      return notify('Document switch prevented', `Local changes to ${doc} conflict with online copy — cancelled document switching to prevent data loss.`)
+    }
+
+    save.then(_ => load(newdoc))
+      .then(_ => {
+        DOCSELECT.value = newdoc;
+        console.log(`Switched to: ${newdoc}`)
+        document.querySelector('aside').classList.add('closed')
+        close()
+        document.querySelector('textarea').focus()
+      })
+  })
 }
 
 function open() {
@@ -55,7 +91,6 @@ function open() {
 
   let selection = 0
   input.addEventListener('keydown', e => {
-    console.log(e)
     if (e.key === 'Escape') close()
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       notes[selection].$node.className =''

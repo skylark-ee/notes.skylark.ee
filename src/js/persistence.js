@@ -35,7 +35,9 @@ export function list() {
 export function load(doc) {
   return fetch(`/api/notes/${doc}`,  { credentials: 'same-origin' }).then(n => n.text()).then(note => {
     EDITOR.value = SERVER_DOCS[doc] = note
+    STATE.set('activeDocument', doc)
     autosize.update(EDITOR)
+    notify('Loaded', `${doc} - loaded last saved version of the document.`)
   })
 }
 
