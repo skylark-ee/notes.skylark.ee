@@ -43,6 +43,8 @@ export default function init() {
 
     if (swipe.move - swipe.start > 20) {
       open()
+    } else {
+      e.target.click()
     }
   })
 
