@@ -65,8 +65,10 @@ function switchTo(newdoc) {
         document.querySelector('aside').classList.add('closed')
 
         // Focus editor
-        // TODO: remember last cursor/scroll position
         document.querySelector('textarea').focus()
+        // TODO: remember last cursor/scroll position
+        document.querySelector('textarea').selectionStart = 0
+        document.querySelector('textarea').selectionEnd = 0
       })
   })
 }

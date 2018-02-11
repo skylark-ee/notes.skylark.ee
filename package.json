@@ -4,7 +4,7 @@
   "description": "File-storage backed notes in markdown",
   "main": "index.js",
   "scripts": {
-    "build": "mkdir -p data/build/js && cp node_modules/autosize/dist/autosize.min.js data/build/js/ && rollup -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
+    "build": "mkdir -p data/build/js && rollup -o data/build/js/bundle.js -f iife -m inline src/js/index.js",
     "develop": "node src/server.js --dev",
     "pre-develop": "npm run build",
     "sync": "node -e \"require('./src/dropbox.js').dropboxSync()\"",
@@ -20,7 +20,6 @@
     "url": "https://github.com/skylark-ee/notes.skylark.ee.git"
   },
   "dependencies": {
-    "autosize": "^4.0.0",
     "cookie-parser": "^1.4.3",
     "dropbox": "^2.5.13",
     "express": "^4.16.2",

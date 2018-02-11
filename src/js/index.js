@@ -9,7 +9,6 @@ const $ = document.querySelector.bind(document)
 const EDITOR = document.querySelector('textarea')
 const DOCSELECT = document.querySelector('aside select')
 
-autosize(EDITOR)
 
 listDocuments()
 initAutosave()
@@ -24,12 +23,10 @@ $('aside ul button[name="savedoc"]').addEventListener('click', event => save(DOC
 $('aside ul button[name="incfontsize"]').addEventListener('click', event => {
   let s = parseInt(EDITOR.style.fontSize)
   EDITOR.style.fontSize = (isNaN(s) ? 110 : s+10)+'%'
-  autosize.update(EDITOR)
 })
 $('aside ul button[name="decfontsize"]').addEventListener('click', event => {
   let s = parseInt(EDITOR.style.fontSize)
   EDITOR.style.fontSize = (isNaN(s) ? 90 : s-10)+'%'
-  autosize.update(EDITOR)
 })
 
 DOCSELECT.addEventListener('change', event => {

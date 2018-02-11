@@ -63,7 +63,6 @@ export function load(doc) {
     EDITOR.value = SERVER_DOCS[doc] = note
     STATE.set('activeDocument', doc)
     if (DOCSELECT.value !== doc) DOCSELECT.value = doc
-    autosize.update(EDITOR)
     notify('Loaded', `${doc} - loaded last saved version of the document.`)
   })
 }
