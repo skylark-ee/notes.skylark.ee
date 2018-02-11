@@ -2,7 +2,7 @@
 
 import { default as STATE } from './state.js'
 import { notify } from './notifications.js'
-import { isModified, save, load } from './persistence.js'
+import { isModified, save, switchTo as loadAndSwitch } from './persistence.js'
 
 
 const html = `
@@ -55,12 +55,17 @@ function switchTo(newdoc) {
       return notify('Document switch prevented', `Local changes to ${doc} conflict with online copy — cancelled document switching to prevent data loss.`)
     }
 
-    save.then(_ => load(newdoc))
+    save
+      .then(_ => loadAndSwitch(newdoc))
       .then(_ => {
-        DOCSELECT.value = newdoc;
-        console.log(`Switched to: ${newdoc}`)
-        document.querySelector('aside').classList.add('closed')
+        // Close overlay
         close()
+
+        // Close menu
+        document.querySelector('aside').classList.add('closed')
+
+        // Focus editor
+        // TODO: remember last cursor/scroll position
         document.querySelector('textarea').focus()
       })
   })

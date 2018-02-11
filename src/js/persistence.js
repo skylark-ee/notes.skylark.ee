@@ -9,33 +9,60 @@ const SERVER_DOCS = []
 
 
 export function list() {
-  return fetch(`/api/docs.json`, { credentials: 'same-origin' }).then(r => r.json()).then(docs => {
-    // Sort docs by name
-    docs.sort((a,b) => a.name > b.name)
+  return fetch(`/api/docs.json`, { credentials: 'same-origin' }).then(r => r.json()).then(notes => {
+    // Sort notes by name
+    notes.sort((a,b) => a.name > b.name)
 
-    DOCSELECT.innerHTML = docs.map(doc => `<option>${doc.name}</option>`).join('')
+    STATE.set('notes', notes)
+
+    DOCSELECT.innerHTML = notes.map(doc => `<option>${doc.name}</option>`).join('')
 
     let sel=(window.location.hash||'').substring(1);
 
-    if (sel && docs.filter(d => d.name === sel).length) {
+    if (sel && notes.filter(d => d.name === sel).length) {
       setTimeout(_ => {
-        console.log('Switched to', sel)
-        DOCSELECT.value = sel
-        load(sel)
+        switchTo(sel)
       }, 50);
     } else {
-      window.location.hash = ''
-      load(docs[0].name)
+      //switchTo(notes[0].name)
+      updateWindowState()
+      load(notes[0].name)
     }
 
-    STATE.set('notes', docs)
   })
+}
+
+
+function updateWindowState(hash, title = `Notes${hash&&(': '+hash)||''}`) {
+  const l = window.location;
+
+  if ("pushState" in history) {
+    history.replaceState('', title||document.title, l.pathname + l.search + (hash&&('#'+hash)||''))
+  } else {
+    window.location.hash = hash||''
+  }
+
+  if (title) window.title = title
+}
+
+export function switchTo(doc) {
+  const notes = STATE.get('notes')
+
+  // Default: first note
+  if (!doc) doc = notes[0]
+
+  // Update window hash
+  updateWindowState(doc)
+
+  console.log('Switch to:', doc)
+  return load(doc)
 }
 
 export function load(doc) {
   return fetch(`/api/notes/${doc}`,  { credentials: 'same-origin' }).then(n => n.text()).then(note => {
     EDITOR.value = SERVER_DOCS[doc] = note
     STATE.set('activeDocument', doc)
+    if (DOCSELECT.value !== doc) DOCSELECT.value = doc
     autosize.update(EDITOR)
     notify('Loaded', `${doc} - loaded last saved version of the document.`)
   })
