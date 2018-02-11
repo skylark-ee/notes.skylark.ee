@@ -16,17 +16,17 @@ initAutosave()
 initEditor()
 initQuickswitch()
 
-$('aside ul :nth-child(1)>button').addEventListener('click', event => $('aside').classList.toggle('closed'))
+$('aside ul button[name="menu"]').addEventListener('click', event => $('aside').classList.toggle('closed'))
 
-$('aside ul :nth-child(2)>button').addEventListener('click', event => load(DOCSELECT.value))
-$('aside ul :nth-child(3)>button').addEventListener('click', event => save(DOCSELECT.value).then(_ => $('aside').classList.add('closed')))
+$('aside ul button[name="loaddoc"]').addEventListener('click', event => load(DOCSELECT.value))
+$('aside ul button[name="savedoc"]').addEventListener('click', event => save(DOCSELECT.value).then(_ => $('aside').classList.add('closed')))
 
-$('aside ul :nth-child(4)>button').addEventListener('click', event => {
+$('aside ul button[name="incfontsize"]').addEventListener('click', event => {
   let s = parseInt(EDITOR.style.fontSize)
   EDITOR.style.fontSize = (isNaN(s) ? 110 : s+10)+'%'
   autosize.update(EDITOR)
 })
-$('aside ul :nth-child(5)>button').addEventListener('click', event => {
+$('aside ul button[name="decfontsize"]').addEventListener('click', event => {
   let s = parseInt(EDITOR.style.fontSize)
   EDITOR.style.fontSize = (isNaN(s) ? 90 : s-10)+'%'
   autosize.update(EDITOR)
@@ -38,10 +38,10 @@ DOCSELECT.addEventListener('change', event => {
 })
 
 
-$('aside ul :nth-child(6)>button').addEventListener('click', event => sync())
+$('aside ul button[name="startsync"]').addEventListener('click', event => sync())
 
 
-$('aside ul :nth-child(7)>button').addEventListener('click', event => {
+$('aside ul button[name="newdoc"]').addEventListener('click', event => {
   let filename = prompt('Enter filename:\n(.md will be appended automatically)', 'unnamed')
   if (!filename) return
 
