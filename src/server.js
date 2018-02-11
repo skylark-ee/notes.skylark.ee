@@ -39,6 +39,7 @@ app.get('/js/bundle.js', (req,res) => {
       res.type('application/javascript').send(result.code)
     })
     .catch(e => {
+      console.log(e)
       res.status(500).send('/* ROLLUP: '+e+' */')
     })
 })
